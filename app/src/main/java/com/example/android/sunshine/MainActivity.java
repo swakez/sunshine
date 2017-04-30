@@ -18,6 +18,11 @@ package com.example.android.sunshine;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.example.android.sunshine.data.SunshinePreferences;
@@ -33,6 +38,10 @@ public class MainActivity extends AppCompatActivity {
 
     private TextView mWeatherTextView;
 
+    private TextView mErrorMessageTextView;
+
+    private ProgressBar pb_loading_data;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,7 +53,27 @@ public class MainActivity extends AppCompatActivity {
          */
         mWeatherTextView = (TextView) findViewById(R.id.tv_weather_data);
 
+        mErrorMessageTextView = (TextView) findViewById(R.id.error_message);
+
+        pb_loading_data = (ProgressBar) findViewById(R.id.pb_loading_data);
+
         loadWeatherData();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.forecast, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.action_refresh) {
+            mWeatherTextView.setText("");
+            loadWeatherData();
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     public void loadWeatherData() {
@@ -56,8 +85,12 @@ public class MainActivity extends AppCompatActivity {
     public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
 
         @Override
-        protected String[] doInBackground(String... param) {
+        protected void onPreExecute() {
+            pb_loading_data.setVisibility(View.VISIBLE);
+        }
 
+        @Override
+        protected String[] doInBackground(String... param) {
             // If there is no zipcode, there is nothing to look up
             if (param == null) {
                 return null;
@@ -82,10 +115,16 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(String[] s) {
+            pb_loading_data.setVisibility(View.INVISIBLE);
             if (s != null) {
                 for (String weatherData : s) {
+                    mWeatherTextView.setVisibility(View.VISIBLE);
                     mWeatherTextView.append(weatherData + "\n\n\n");
+                    mErrorMessageTextView.setVisibility(View.INVISIBLE);
                 }
+            } else {
+                mWeatherTextView.setVisibility(View.INVISIBLE);
+                mErrorMessageTextView.setVisibility(View.VISIBLE);
             }
 
         }
