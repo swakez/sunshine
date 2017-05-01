@@ -26,6 +26,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.android.sunshine.data.SunshinePreferences;
 import com.example.android.sunshine.utilities.NetworkUtils;
@@ -36,7 +37,8 @@ import org.json.JSONException;
 import java.io.IOException;
 import java.net.URL;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity
+        implements ForecastAdapter.ForecastAdapterOnClickHandler {
 
     private RecyclerView mRecyclerView;
 
@@ -64,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
         mRecyclerView.setLayoutManager(layoutManager);
         mRecyclerView.setHasFixedSize(true);
 
-        mForecastAdapter = new ForecastAdapter();
+        mForecastAdapter = new ForecastAdapter(this);
 
         mRecyclerView.setAdapter(mForecastAdapter);
 
@@ -90,9 +92,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void loadWeatherData() {
-
         String preferredUserLocation = SunshinePreferences.getPreferredWeatherLocation(this);
         new FetchWeatherTask().execute(preferredUserLocation);
+    }
+
+    /**
+     * This method is overridden by MainActivity.java in order to handle the clickevent on recycler view item
+     * @param weatherForDay the weather for the day that has been clicked
+     */
+    @Override
+    public void onClick(String weatherForDay) {
+        Toast.makeText(this,weatherForDay,Toast.LENGTH_SHORT).show();
     }
 
     public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
@@ -123,7 +133,6 @@ public class MainActivity extends AppCompatActivity {
                 e.printStackTrace();
                 return null;
             }
-
         }
 
         @Override

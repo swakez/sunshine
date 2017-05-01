@@ -14,16 +14,23 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.Foreca
 
     private String[] mWeatherData;
 
-    public ForecastAdapter(){
+    final private ForecastAdapterOnClickHandler mClickHandler;
 
+    public ForecastAdapter(ForecastAdapterOnClickHandler forecastAdapterOnClickHandler) {
+        mClickHandler = forecastAdapterOnClickHandler;
+    }
+
+    /* Click interface to be implemented by mainActivity */
+
+    public interface ForecastAdapterOnClickHandler {
+        void onClick(String s);
     }
 
     @Override
     public ForecastAdapterViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.forecast_list_item,parent,false);
-
+                .inflate(R.layout.forecast_list_item, parent, false);
         return new ForecastAdapterViewHolder(view);
     }
 
@@ -33,25 +40,36 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.Foreca
         holder.mWeatherTextView.setText(currentWeatherData);
     }
 
+    // Returns the number of data
     @Override
     public int getItemCount() {
-        if(mWeatherData != null)
+        if (mWeatherData != null)
             return mWeatherData.length;
         return 0;
     }
 
-    public void setWeatherData(String[] weatherData){
+    public void setWeatherData(String[] weatherData) {
         mWeatherData = weatherData;
         notifyDataSetChanged();
     }
 
-    public class ForecastAdapterViewHolder extends RecyclerView.ViewHolder{
+    public class ForecastAdapterViewHolder
+            extends RecyclerView.ViewHolder
+            implements View.OnClickListener {
 
         public final TextView mWeatherTextView;
 
-        public ForecastAdapterViewHolder(View itemView) {
-            super(itemView);
-            mWeatherTextView = (TextView) itemView.findViewById(R.id.tv_weather_data);
+        public ForecastAdapterViewHolder(View view) {
+            super(view);
+            mWeatherTextView = (TextView) view.findViewById(R.id.tv_weather_data);
+            view.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View view) {
+            int clickedPosition = getAdapterPosition();
+            String weatherForDay = mWeatherData[clickedPosition];
+            mClickHandler.onClick(weatherForDay);
         }
     }
 }
