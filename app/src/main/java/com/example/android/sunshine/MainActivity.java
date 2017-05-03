@@ -17,6 +17,7 @@ package com.example.android.sunshine;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -62,7 +63,7 @@ public class MainActivity extends AppCompatActivity
 
         mErrorMessageTextView = (TextView) findViewById(R.id.error_message);
 
-        LinearLayoutManager layoutManager = new LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
 
         mRecyclerView.setLayoutManager(layoutManager);
         mRecyclerView.setHasFixedSize(true);
@@ -85,11 +86,32 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.action_refresh) {
+
+        int itemId = item.getItemId();
+
+        if (itemId == R.id.action_refresh) {
             mForecastAdapter.setWeatherData(null);
             loadWeatherData();
+            return true;
+        }
+        if (itemId == R.id.action_open_map) {
+            openLocationInMap();
+            return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void openLocationInMap(){
+
+        String addressString = "1600 Ampitheatre Parkway, CA";
+        Uri geoLocation = Uri.parse("geo:0,0?q=" + addressString);
+
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setData(geoLocation);
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivity(intent);
+        }
+
     }
 
     public void loadWeatherData() {
@@ -99,6 +121,7 @@ public class MainActivity extends AppCompatActivity
 
     /**
      * This method is overridden by MainActivity.java in order to handle the clickevent on recycler view item
+     *
      * @param weatherForDay the weather for the day that has been clicked
      */
     @Override
@@ -106,9 +129,9 @@ public class MainActivity extends AppCompatActivity
         Context context = this;
         Class targetActivity = DetailActivity.class;
 
-        Intent intent = new Intent(context,targetActivity);
+        Intent intent = new Intent(context, targetActivity);
 
-        intent.putExtra("WEATHER_KEY",weatherForDay);
+        intent.putExtra("WEATHER_KEY", weatherForDay);
 
         startActivity(intent);
 
